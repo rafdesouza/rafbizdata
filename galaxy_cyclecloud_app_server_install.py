@@ -257,7 +257,7 @@ def cyclecloud_account_setup(vm_metadata, use_managed_identity, tenant_id, appli
             print("Registering Azure subscription in CycleCloud")
             try:
                 cmd_list = ["/usr/local/bin/cyclecloud", "account", "create", "-f", azure_data_file]
-                output = subprocess.run(cmd_list, stdout=PIPE, stderr=PIPE)
+                output = subprocess.run(cmd_list, capture_out=True).stdout
                 print("Command list:", cmd_list)
                 print("Command output:", output)
             except CalledProcessError as e:
