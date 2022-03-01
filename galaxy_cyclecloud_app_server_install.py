@@ -1,14 +1,14 @@
 #!/usr/bin/python3
 # Prepare an Azure provider account for CycleCloud usage.
 import os
-import sys
 import argparse
 import json
 import re
 import random
+import platform
 from string import ascii_uppercase, ascii_lowercase, digits
 import subprocess
-from subprocess import CalledProcessError, run
+from subprocess import CalledProcessError, check_output
 from os import path, listdir, chdir, fdopen, remove
 from urllib.request import urlopen, Request
 from shutil import rmtree, copy2, move
@@ -27,9 +27,9 @@ def clean_up():
 
 def _catch_sys_error(cmd_list):
     try:
-        output = subprocess.run(cmd_list, capture_output=True, check=True, text=True).stdout
-        print("Command list:", cmd_list)
-        print("Command output:", output)
+        output = check_output(cmd_list)
+        print(cmd_list)
+        print(output)
         return output
     except CalledProcessError as e:
         print("Error with cmd: %s" % e.cmd)
@@ -144,9 +144,8 @@ def cyclecloud_account_setup(vm_metadata, use_managed_identity, tenant_id, appli
         print('Password specified, using it as the admin password')
         cyclecloud_admin_pw = password
     else:
-        print('Password not specified, using the user name as password')
-        cyclecloud_admin_pw = admin_user
-        
+        cyclecloud_admin_pw = generate_password_string()
+
     if storageAccount:
         print('Storage account specified, using it as the default locker')
         storage_account_name = storageAccount
@@ -249,19 +248,11 @@ def cyclecloud_account_setup(vm_metadata, use_managed_identity, tenant_id, appli
             if use_managed_identity:
                 get_vm_managed_identity()
 
-            # create the cloud provided account
-                # Retry await_startup in case it takes much longer than expected 
-            # (this is common in local testing with limited compute resources)
-            max_tries = 10
-            created = False
+            # create the cloud provide account
             print("Registering Azure subscription in CycleCloud")
-            try:
-                cmd_list = ["/usr/local/bin/cyclecloud", "account", "create", "-f", azure_data_file]
-                output = subprocess.run(cmd_list, capture_out=True).stdout
-                print("Command list:", cmd_list)
-                print("Command output:", output)
-            except CalledProcessError as e:
-                print("Error adding the subscription")
+            _catch_sys_error(["/usr/local/bin/cyclecloud", "account",
+                            "create", "-f", azure_data_file])
+
 
 def initialize_cyclecloud_cli(admin_user, cyclecloud_admin_pw, webserver_port):
     print("Setting up azure account in CycleCloud and initializing cyclecloud CLI")
@@ -275,12 +266,12 @@ def initialize_cyclecloud_cli(admin_user, cyclecloud_admin_pw, webserver_port):
 
 
 def letsEncrypt(fqdn):
-    sleep(90)
+    sleep(60)
     try:
         cmd_list = [cs_cmd, "keystore", "automatic", "--accept-terms", fqdn]
-        output = subprocess.run(cmd_list, capture_output=True, check=True, text=True).stdout
-        print("Command list:", cmd_list)
-        print("Command output:", output)
+        output = check_output(cmd_list)
+        print(cmd_list)
+        print(output)
     except CalledProcessError as e:
         print("Error getting SSL cert from Lets Encrypt")
         print("Proceeding with self-signed cert")
@@ -337,7 +328,7 @@ def start_cc():
             raise Exception("ERROR: No backups found, but master.logfile is corrupt!")
         try:
             yes = subprocess.Popen(['echo', 'yes'], stdout=subprocess.PIPE)
-            output = subprocess.subprocess.run(['/opt/cycle_server/util/restore.sh'], stdin=yes.stdout)
+            output = subprocess.check_output(['/opt/cycle_server/util/restore.sh'], stdin=yes.stdout)
             yes.wait()
             print(output)
         except CalledProcessError as e:
@@ -349,7 +340,7 @@ def start_cc():
 
     # Retry await_startup in case it takes much longer than expected 
     # (this is common in local testing with limited compute resources)
-    max_tries = 60
+    max_tries = 3
     started = False
     while not started:
         try:
@@ -358,8 +349,7 @@ def start_cc():
             started = True
         except:
             if max_tries >  0:
-                print("Retrying after 20 seconds...")
-                sleep(20)
+                print("Retrying...")
             else:
                 raise 
 
@@ -423,10 +413,17 @@ def already_installed():
 
 def download_install_cc():
     print("Installing Azure CycleCloud server")
-    _catch_sys_error(["apt", "install", "-y", "cyclecloud8"])
+
+    if "ubuntu" in str(platform.platform()).lower():
+        _catch_sys_error(["apt", "install", "-y", "cyclecloud8"])
+    else:
+        _catch_sys_error(["yum", "install", "-y", "cyclecloud8"])
 
 def configure_msft_repos():
-    configure_msft_apt_repos()
+    if "ubuntu" in str(platform.platform()).lower():
+        configure_msft_apt_repos()
+    else:
+        configure_msft_yum_repos()
 
 def configure_msft_apt_repos():
     print("Configuring Microsoft apt repository for CycleCloud install")
@@ -435,9 +432,7 @@ def configure_msft_apt_repos():
     _catch_sys_error(
         ["apt-key", "add", "/tmp/microsoft.asc"])
     
-    # Fix while Ubuntu 20 is not available -- we install the Ubuntu 18.04 version
-    lsb_release = "bionic"
-
+    lsb_release = _catch_sys_error(["lsb_release", "-cs"]).decode("utf-8").strip()
     with open('/etc/apt/sources.list.d/azure-cli.list', 'w') as f:
         f.write("deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ {} main".format(lsb_release))
 
@@ -445,14 +440,47 @@ def configure_msft_apt_repos():
         f.write("deb [arch=amd64] https://packages.microsoft.com/repos/cyclecloud {} main".format(lsb_release))
     _catch_sys_error(["apt", "update", "-y"])
 
+def configure_msft_yum_repos():
+    print("Configuring Microsoft yum repository for CycleCloud install")
+    _catch_sys_error(
+        ["rpm", "--import", "https://packages.microsoft.com/keys/microsoft.asc"])
+
+    with open('/etc/yum.repos.d/cyclecloud.repo', 'w') as f:
+        f.write("""\
+[cyclecloud]
+name=cyclecloud
+baseurl=https://packages.microsoft.com/yumrepos/cyclecloud
+gpgcheck=1
+gpgkey=https://packages.microsoft.com/keys/microsoft.asc
+""")
+
+    with open('/etc/yum.repos.d/azure-cli.repo', 'w') as f:
+        f.write("""\
+[azure-cli]
+name=Azure CLI
+baseurl=https://packages.microsoft.com/yumrepos/azure-cli
+enabled=1
+gpgcheck=1
+gpgkey=https://packages.microsoft.com/keys/microsoft.asc      
+""")
+
+
 def install_pre_req():
     print("Installing pre-requisites for CycleCloud server")
-    _catch_sys_error(["apt", "update", "-y"])
-    _catch_sys_error(["apt", "install", "-y", "openjdk-8-jre-headless"])
-    _catch_sys_error(["apt", "install", "-y", "unzip"])
-    _catch_sys_error(["apt", "install", "-y", "python3-venv"])
-    # Not strictly needed, but it's useful to have the AZ CLI
-    _catch_sys_error(["apt", "install", "-y", "azure-cli"])
+
+    # not strictly needed, but it's useful to have the AZ CLI
+    # Taken from https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-yum?view=azure-cli-latest
+
+    if "ubuntu" in str(platform.platform()).lower():
+        _catch_sys_error(["apt", "update", "-y"])
+        _catch_sys_error(["apt", "install", "-y", "openjdk-8-jre-headless"])
+        _catch_sys_error(["apt", "install", "-y", "unzip"])
+        _catch_sys_error(["apt", "install", "-y", "python3-venv"])
+        _catch_sys_error(["apt", "install", "-y", "azure-cli"])
+    else:
+        _catch_sys_error(["yum", "install", "-y", "java-1.8.0-openjdk-headless"])
+        _catch_sys_error(["yum", "install", "-y", "azure-cli"])
+
 
 def main():
 
@@ -592,7 +620,7 @@ def main():
         letsEncrypt(args.hostname)
 
     #  Create user requires root privileges
-    create_user_credential(args.username, args.publickey)
+    # create_user_credential(args.username, args.publickey)
 
     clean_up()
 
