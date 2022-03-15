@@ -113,7 +113,7 @@ def reset_cyclecloud_pw(username):
         print("Password reset error: %s" % (reset_err))
     out_split = reset_out.rsplit(None, 1)
     pw = out_split.pop().decode("utf-8")
-    print("Disabling forced password reseet for {}".format(username))
+    print("Disabling forced password reset for {}".format(username))
     update_cmd = 'update AuthenticatedUser set ForcePasswordReset = false where Name=="%s"' % (username)
     _catch_sys_error([cs_cmd, 'execute', update_cmd])
     return pw 
@@ -209,8 +209,8 @@ def cyclecloud_account_setup(vm_metadata, use_managed_identity, tenant_id, appli
 
     account_data_file = tmpdir + "/account_data.json"
 
-    with open(account_data_file, 'w', encoding='utf-8) as fp:
-        json.dump(account_data, fp, ensure_ascii=False, indent=4)
+    with open(account_data_file, 'w') as fp:
+        json.dump(account_data, fp)
 
     config_path = os.path.join(cycle_root, "config/data/")
     _catch_sys_error(["chown", "cycle_server:cycle_server", account_data_file])
@@ -466,19 +466,22 @@ def main():
 
     parser.add_argument("--tenantId",
                         dest="tenantId",
+                        default="",
                         help="Tenant ID of the Azure subscription")
 
     parser.add_argument("--applicationId",
                         dest="applicationId",
+                        default="",
                         help="Application ID of the Service Principal")
 
     parser.add_argument("--applicationSecret",
                         dest="applicationSecret",
+                        default="",
                         help="Application Secret of the Service Principal")
 
     parser.add_argument("--username",
                         dest="username",
-                        default="cc_admin",
+                        default="hpcadmin",
                         help="The local admin user for the CycleCloud VM")
 
     parser.add_argument("--hostname",
@@ -512,6 +515,7 @@ def main():
 
     parser.add_argument("--publickey",
                         dest="publickey",
+                        default="",
                         help="The public ssh key for the CycleCloud UI user")
 
     parser.add_argument("--storageAccount",
@@ -559,7 +563,7 @@ def main():
 
     parser.add_argument("--numberOfWorkerNodes",
                         dest="numberOfWorkerNodes",
-                        default="2",
+                        default=2,
                         help="The VM size for worker nodes")
 
     args = parser.parse_args()
@@ -582,9 +586,15 @@ def main():
     install_cc_cli()
 
     vm_metadata = get_vm_metadata()
-    decoded_password = base64.b64decode(args.password)
-    decodedPublicKey = base64.b64decode(args.publickey)
+    decoded_password = base64.b64decode(args.password).decode('ascii')
+    decoded_publicKey = base64.b64decode(args.publickey).decode('ascii')
 
+    print("The raw password is: %s" % args.password)
+    print("The decoded password is: %s" % decoded_password)
+
+
+    print("The raw SSH key is: %s" %  args.publickey)
+    print("The decoded SSH key is: %s" % decoded_publicKey)
 
     if args.resourceGroup:
         print("CycleCloud created in resource group: %s" % vm_metadata["compute"]["resourceGroupName"])
@@ -600,7 +610,7 @@ def main():
         letsEncrypt(args.hostname)
 
     #  Create user requires root privileges
-    create_user_credential(args.username, decodedPublicKey)
+    create_user_credential(args.username, decoded_publicKey)
 
     clean_up()
 
