@@ -209,8 +209,8 @@ def cyclecloud_account_setup(vm_metadata, use_managed_identity, tenant_id, appli
 
     account_data_file = tmpdir + "/account_data.json"
 
-    with open(account_data_file, 'w') as fp:
-        json.dump(account_data, fp)
+    with open(account_data_file, 'w', encoding='utf-8) as fp:
+        json.dump(account_data, fp, ensure_ascii=False, indent=4)
 
     config_path = os.path.join(cycle_root, "config/data/")
     _catch_sys_error(["chown", "cycle_server:cycle_server", account_data_file])
