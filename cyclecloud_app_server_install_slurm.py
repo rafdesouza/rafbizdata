@@ -457,7 +457,7 @@ def install_pre_req():
 
 def create_slurm():
     #download the custom slurm template
-    _catch_sys_error(["wget","-q","-O","/tmp/slurm-bizcustom.txt",""])
+    _catch_sys_error(["wget","-q","-O","/tmp/slurm-bizcustom.txt",])
 
 def main():
 
