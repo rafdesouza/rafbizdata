@@ -597,8 +597,11 @@ def main():
     install_cc_cli()
 
     vm_metadata = get_vm_metadata()
-    decoded_password = base64.b64decode(args.password).decode('ascii')
-    decoded_publicKey = base64.b64decode(args.publickey).decode('ascii')
+    # decoded_password = base64.b64decode(args.password).decode('ascii')
+    # decoded_publicKey = base64.b64decode(args.publickey).decode('ascii')
+
+    decoded_password = args.password
+    decoded_publicKey = args.publickey
 
     print("The raw password is: %s" % args.password)
     print("The decoded password is: %s" % decoded_password)
@@ -626,7 +629,7 @@ def main():
     add_slurm_fix()
 
     import_bizcluster()
-    
+
     clean_up()
 
 
