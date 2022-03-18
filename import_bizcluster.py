@@ -37,10 +37,9 @@ def import_bizcluster():
 #    _catch_sys_error(["wget", "-q", "-O", "/tmp/params.json", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/params.json"])
     _catch_sys_error(["/usr/local/bin/cyclecloud", "import_cluster", "-f", "/tmp/slurm-bizcustom.txt", "-p", "/tmp/params.json"])
 
-# def start_cluster():
-
-    
-    
+def start_cluster():
+    _catch_sys_error(["usr/local/bin/cyclecloud", "start_cluster", "Slurm"])
     
 
 import_bizcluster()
+start_cluster()
