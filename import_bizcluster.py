@@ -35,14 +35,7 @@ def add_slurm_fix():
 def import_bizcluster():
 #    _catch_sys_error(["wget", "-q", "-O", "/tmp/slurm-bizcustom.txt", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/slurm-bizcustom.txt"])
 #    _catch_sys_error(["wget", "-q", "-O", "/tmp/params.json", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/params.json"])
-
-    try: 
-        cmd_list = [cs_cmd, "cyclecloud", "import_cluster","- f", "/tmp/slurm-bizcustom.txt", "-p", "/tmp/params.json"]
-        output = subprocess.run(cmd_list, capture_output=True).stdout
-        print("Command list:", cmd_list)
-        print("Command output:", output)
+    _catch_sys_error(["cyclecloud", "import_cluster","Slurm3", "c","Slurm", "- f", "/tmp/slurm-bizcustom.txt", "-p", "/tmp/params.json"])
     
-    except CalledProcessError as e:
-        print("Error adding the customized slurm cluster")
 
 import_bizcluster()
