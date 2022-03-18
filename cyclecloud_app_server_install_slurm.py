@@ -455,9 +455,16 @@ def install_pre_req():
     # Not strictly needed, but it's useful to have the AZ CLI
     _catch_sys_error(["apt", "install", "-y", "azure-cli"])
 
-def create_slurm():
-    #download the custom slurm template
-    _catch_sys_error(["wget","-q","-O","/tmp/slurm-bizcustom.txt",])
+def add_slurm_fix():
+    #download slurm fix 
+    _catch_sys_error(["wget","-q","-O","/tmp/cluster-init-slurm-2.5.1.txt","https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/cluster-init-slurm-2.5.1.txt"])
+    _catch_sys_error(["mv", "/tmp/cluster-init-slurm-2.5.1.txt", "/opt/cycle_server/config/data"])
+
+def import_bizcluster():
+    _catch_sys_error(["wget", "-q", "-O", "/tmp/slurm-bizcustom.txt", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/slurm-bizcustom.txt"])
+    _catch_sys_error(["wget", "-q", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/params.json"])
+    _catch_sys_error(["cyclecloud", "import_cluster","- f /tmp/slurm-bizcustom.txt", "-p /tmp/params.json"])
+
 
 def main():
 
