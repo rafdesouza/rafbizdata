@@ -13,6 +13,9 @@ from shutil import rmtree, copy2, move
 from tempfile import mkstemp, mkdtemp
 from time import sleep
 
+cycle_root = "/opt/cycle_server"
+cs_cmd = cycle_root + "/cycle_server"
+
 def _catch_sys_error(cmd_list):
     try:
         output = subprocess.run(cmd_list, capture_output=True, check=True, text=True).stdout
@@ -24,12 +27,17 @@ def _catch_sys_error(cmd_list):
         print("Output: %s" % e.output)
         raise
 
+def add_slurm_fix():
+#     #download slurm fix 
+    _catch_sys_error(["wget","-q","-O","/tmp/cluster-init-slurm-2.5.1.txt","https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/cluster-init-slurm-2.5.1.txt"])
+    _catch_sys_error(["mv", "/tmp/cluster-init-slurm-2.5.1.txt", "/opt/cycle_server/config/data/"])
+
 def import_bizcluster():
 #    _catch_sys_error(["wget", "-q", "-O", "/tmp/slurm-bizcustom.txt", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/slurm-bizcustom.txt"])
 #    _catch_sys_error(["wget", "-q", "-O", "/tmp/params.json", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/params.json"])
 
     try: 
-        cmd_list = ["cyclecloud", "import_cluster","- f", "/tmp/slurm-bizcustom.txt", "-p", "/tmp/params.json"]
+        cmd_list = [cs_cmd, "cyclecloud", "import_cluster","- f", "/tmp/slurm-bizcustom.txt", "-p", "/tmp/params.json"]
         output = subprocess.run(cmd_list, capture_output=True).stdout
         print("Command list:", cmd_list)
         print("Command output:", output)
