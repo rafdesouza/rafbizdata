@@ -1,4 +1,4 @@
-# params.json
+
 {
     "UsePublicNetwork" : true,
     "AdditionalNAS" : false,
@@ -43,4 +43,4 @@
     "HTCClusterInitSpecs" : null,
     "additional_slurm_config" : null,
     "HPCMaxScalesetSize" : 100
-    }
+}
