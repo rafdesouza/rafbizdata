@@ -35,7 +35,7 @@ def _catch_sys_error(cmd_list):
 def import_bizcluster():
 #    _catch_sys_error(["wget", "-q", "-O", "/tmp/slurm-bizcustom.txt", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/slurm-bizcustom.txt"])
 #    _catch_sys_error(["wget", "-q", "-O", "/tmp/params.json", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/params.json"])
-    # _catch_sys_error(["/usr/local/bin/cyclecloud", "import_cluster","Slurm3", "-c", "Slurm", "- f", "/tmp/slurm-bizcustom.txt", "-p", "/tmp/params.json"])
+    _catch_sys_error(["/usr/local/bin/cyclecloud", "import_cluster", "NOVO", "-c", "Slurm", "- f", "/tmp/slurm-bizcustom.txt", "-p", "/tmp/params.json"])
     _catch_sys_error(["/usr/local/bin/cyclecloud", "-v"])
     
     
