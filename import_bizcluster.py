@@ -35,7 +35,8 @@ def add_slurm_fix():
 def import_bizcluster():
 #    _catch_sys_error(["wget", "-q", "-O", "/tmp/slurm-bizcustom.txt", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/slurm-bizcustom.txt"])
 #    _catch_sys_error(["wget", "-q", "-O", "/tmp/params.json", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/params.json"])
-        subprocess.run(["cyclecloud", "import_cluster","Slurm3", "-c","Slurm", "- f", "/tmp/slurm-bizcustom.txt", "-p", "/tmp/params.json"])
+    subprocess.run(["cyclecloud", "import_cluster","Slurm3", "-c", "Slurm", "- f", "/tmp/slurm-bizcustom.txt", "-p", "/tmp/params.json"])
+    
     
 
 import_bizcluster()
