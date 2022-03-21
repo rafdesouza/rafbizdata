@@ -30,7 +30,7 @@ def _catch_sys_error(cmd_list):
 def add_slurm_fix():
 #     #download slurm fix 
     _catch_sys_error(["wget","-q","-O","/tmp/cluster-init-slurm-2.5.1.txt","https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/cluster-init-slurm-2.5.1.txt"])
-    _catch_sys_error(["mv", "/tmp/cluster-init-slurm-2.5.1.txt", "/opt/cycle_server/config/data/"])
+    _catch_sys_error(["sudo", "mv", "/tmp/cluster-init-slurm-2.5.1.txt", "/opt/cycle_server/config/data/"])
 
 def import_bizcluster():
     _catch_sys_error(["wget", "-q", "-O", "/tmp/slurm-bizcustom.txt", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/slurm-bizcustom.txt"])
