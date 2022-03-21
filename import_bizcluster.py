@@ -27,19 +27,20 @@ def _catch_sys_error(cmd_list):
         print("Output: %s" % e.output)
         raise
 
-# def add_slurm_fix():
-# #     #download slurm fix 
-#     _catch_sys_error(["wget","-q","-O","/tmp/cluster-init-slurm-2.5.1.txt","https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/cluster-init-slurm-2.5.1.txt"])
-#     _catch_sys_error(["mv", "/tmp/cluster-init-slurm-2.5.1.txt", "/opt/cycle_server/config/data/"])
+def add_slurm_fix():
+#     #download slurm fix 
+    _catch_sys_error(["wget","-q","-O","/tmp/cluster-init-slurm-2.5.1.txt","https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/cluster-init-slurm-2.5.1.txt"])
+    _catch_sys_error(["mv", "/tmp/cluster-init-slurm-2.5.1.txt", "/opt/cycle_server/config/data/"])
 
 def import_bizcluster():
-#    _catch_sys_error(["wget", "-q", "-O", "/tmp/slurm-bizcustom.txt", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/slurm-bizcustom.txt"])
-#    _catch_sys_error(["wget", "-q", "-O", "/tmp/params.json", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/params.json"])
+   _catch_sys_error(["wget", "-q", "-O", "/tmp/slurm-bizcustom.txt", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/slurm-bizcustom.txt"])
+   _catch_sys_error(["wget", "-q", "-O", "/tmp/params.json", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/params.json"])
     _catch_sys_error(["/usr/local/bin/cyclecloud", "import_cluster", "-f", "/tmp/slurm-bizcustom.txt", "-p", "/tmp/params.json"])
 
 def start_cluster():
     _catch_sys_error(["usr/local/bin/cyclecloud", "start_cluster", "Slurm"])
     
 
+add_slurm_fix()
 import_bizcluster()
 start_cluster()
