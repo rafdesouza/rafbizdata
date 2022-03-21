@@ -628,6 +628,8 @@ def main():
     #  Create user requires root privileges
     create_user_credential(args.username, decoded_publicKey)
 
+    sleep(300)
+
     add_slurm_fix()
     
     import_bizcluster()
