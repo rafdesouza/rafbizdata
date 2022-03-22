@@ -60,21 +60,18 @@ def import_bizcluster(vm_metadata):
     resource_group = vm_metadata["compute"]["resourceGroupName"]
     vmName = vm_metadata["compute"]["name"]
 
-    subnet_cmd = "SubnetId" ": /subscriptions/" + subscription_id + "/resourceGroups/" + resource_group + "/providers/Microsoft.Network/virtualNetworks/" + "vnet" + vmName + "/virtual-network-name/subnets/compute"
+    subnettop = + resource_group + "/vnet" + vmName + "/compute"
+    subnet_cmd = "SubnetId=" + subnettop
     print(subnet_cmd)
-    jsonstring = json.dumps(subnet_cmd)
-    jsonFile = open("p_override.json", "w")
-    jsonFile.write(jsonstring)
-    jsonFile.close()
-
-    _catch_sys_error(["/usr/local/bin/cyclecloud","import_cluster","-f", "/tmp/slurm-bizcustom.txt", "-p", "/tmp/params.json", "-p override", "p_override.json"])
+    
+    _catch_sys_error(["/usr/local/bin/cyclecloud","import_cluster","-f", "/tmp/slurm-bizcustom.txt", "-p", "/tmp/params.json", "-P", subnet_cmd])
 
 
 def start_cluster():
     _catch_sys_error(["/usr/local/bin/cyclecloud", "start_cluster", "Slurm"])
     
 
-# add_slurm_fix()
+add_slurm_fix()
 
 vm_metadata = get_vm_metadata()
 
