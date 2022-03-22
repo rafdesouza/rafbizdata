@@ -468,7 +468,7 @@ def import_bizcluster(vm_metadata):
     resource_group = vm_metadata["compute"]["resourceGroupName"]
     vmName = vm_metadata["compute"]["name"]
 
-    subnettop = + resource_group + "/vnet" + vmName + "/compute"
+    subnettop = resource_group + "/vnet" + vmName + "/compute"
     subnet_cmd = "SubnetId=" + subnettop
     print(subnet_cmd)
     
