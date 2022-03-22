@@ -460,13 +460,23 @@ def add_slurm_fix():
     _catch_sys_error(["wget","-q","-O","/tmp/cluster-init-slurm-2.5.1.txt","https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/cluster-init-slurm-2.5.1.txt"])
     _catch_sys_error(["mv", "/tmp/cluster-init-slurm-2.5.1.txt", "/opt/cycle_server/config/data/"])
 
-def import_bizcluster():
-    _catch_sys_error(["wget", "-q", "-O", "/tmp/slurm-bizcustom.txt", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/slurm-bizcustom.txt"])
-    _catch_sys_error(["wget", "-q", "-O", "/tmp/params.json", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/params.json"])
-    _catch_sys_error(["/usr/local/bin/cyclecloud", "import_cluster", "-f", "/tmp/slurm-bizcustom.txt", "-p", "/tmp/params.json"])
+def import_bizcluster(vm_metadata):
+    _catch_sys_error(["sudo", "wget", "-q", "-O", "/tmp/slurm-bizcustom.txt", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/slurm-bizcustom.txt"])
+    _catch_sys_error(["sudo", "wget", "-q", "-O", "/tmp/params.json", "https://raw.githubusercontent.com/rafdesouza/rafbizdata/main/params.json"])
+
+    subscription_id = vm_metadata["compute"]["subscriptionId"]
+    resource_group = vm_metadata["compute"]["resourceGroupName"]
+    vmName = vm_metadata["compute"]["name"]
+
+    subnettop = + resource_group + "/vnet" + vmName + "/compute"
+    subnet_cmd = "SubnetId=" + subnettop
+    print(subnet_cmd)
+    
+    _catch_sys_error(["/usr/local/bin/cyclecloud","import_cluster","-f", "/tmp/slurm-bizcustom.txt", "-p", "/tmp/params.json", "-P", subnet_cmd])
+
 
 def start_cluster():
-    _catch_sys_error(["usr/local/bin/cyclecloud", "start_cluster", "Slurm"])
+    _catch_sys_error(["/usr/local/bin/cyclecloud", "start_cluster", "Slurm"])
     
 def main():
 
@@ -632,7 +642,7 @@ def main():
 
     add_slurm_fix()
     
-    import_bizcluster()
+    import_bizcluster(vm_metadata)
     
     start_cluster()
 
