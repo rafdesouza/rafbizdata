@@ -60,10 +60,10 @@ def import_bizcluster(vm_metadata):
     resource_group = vm_metadata["compute"]["resourceGroupName"]
     vmName = vm_metadata["compute"]["name"]
 
-    subnetId = "/subscriptions/" + subscription_id + "/resourceGroups/" + resource_group + "/providers/Microsoft.Network/virtualNetworks/" + "vnet" + vmName + "/virtual-network-name/subnets/compute"
+    subnet_cmd = "SubnetId" ": /subscriptions/" + subscription_id + "/resourceGroups/" + resource_group + "/providers/Microsoft.Network/virtualNetworks/" + "vnet" + vmName + "/virtual-network-name/subnets/compute"
     print(subnetId)
 
-    _catch_sys_error(["/usr/local/bin/cyclecloud","import_cluster","-f", "/tmp/slurm-bizcustom.txt", "-p", "/tmp/params.json"])
+    _catch_sys_error(["/usr/local/bin/cyclecloud","import_cluster","-f", "/tmp/slurm-bizcustom.txt", "-p", "/tmp/params.json", "-p override", subnet_cmd])
 
 
 def start_cluster():
