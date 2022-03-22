@@ -61,7 +61,7 @@ def import_bizcluster(vm_metadata):
     vmName = vm_metadata["compute"]["name"]
 
     subnet_cmd = "SubnetId" ": /subscriptions/" + subscription_id + "/resourceGroups/" + resource_group + "/providers/Microsoft.Network/virtualNetworks/" + "vnet" + vmName + "/virtual-network-name/subnets/compute"
-    print(subnetId)
+    print(subnet_cmd)
     jsonstring = json.dumps(subnet_cmd)
     jsonFile = open("p_override.json", "w")
     jsonFile.write(jsonstring)
