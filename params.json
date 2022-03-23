@@ -43,5 +43,5 @@
     "HTCClusterInitSpecs" : null,
     "additional_slurm_config" : null,
     "HPCMaxScalesetSize" : 100,
-    "SubnetId": "SubnetName"
+    "SubnetId" : "SubnetName"
 }
